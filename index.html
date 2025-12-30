@@ -1,0 +1,997 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STEKSA.NET</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .slider-container {
+      position: relative;
+      overflow: hidden;
+      border-radius: 1.5rem;
+    }
+
+    .slider-track {
+      display: flex;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .slider-slide {
+      min-width: 100%;
+      flex-shrink: 0;
+    }
+
+    .slider-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 9999px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .slider-dot.active {
+      width: 2rem;
+    }
+
+    .fiber-glow {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .fiber-glow::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.1) 0%, transparent 70%);
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .coverage-map {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 300px;
+    }
+
+    .map-marker {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes ping {
+      75%, 100% {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+
+    .theme-transition {
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .glass-effect {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full theme-transition">
+  <div id="app-root" class="h-full"></div>
+  <script>
+    const defaultConfig = {
+      // Brand
+      company_name: "STEKSA.NET",
+      company_tagline: "Lightning-Fast Fiber Internet",
+      
+      // Hero
+      hero_title: "Experience True Fiber Speed",
+      hero_subtitle: "Bandwidth tak terbatas, tanpa pelambatan, teknologi serat optik murni yang dikirimkan ke rumah Anda",
+      hero_cta: "Get Started Today",
+      
+      // Profile
+      profile_title: "Tentang SteksaNet",
+      profile_description: "Kami adalah penyedia FTTH (Fiber-to-the-Home) terkemuka di Pabuaran, yang menghadirkan internet serat optik mutakhir langsung ke rumah Anda. Dengan pengalaman lebih dari 5 tahun dan lebih dari 500 pelanggan yang puas, kami berkomitmen untuk menghubungkan masyarakat dengan internet tercepat dan terandal yang tersedia.",
+      
+      // Pricing
+      plan1_name: "Basic",
+      plan1_speed: "10 Mbps",
+      plan1_price: "Rp 150rb",
+      plan2_name: "Standar",
+      plan2_speed: "20 Mbps",
+      plan2_price: "Rp 250rb",
+      plan3_name: "Premium",
+      plan3_speed: "50 Mbps",
+      plan3_price: "Rp 500rb",
+      
+      // Coverage
+      coverage_title: "Area Cakupan Layanan",
+      
+      // Contact
+      contact_title: "Hubungi Kami",
+      contact_phone: "+62 852-8004-1102",
+      contact_email: "info@steksa.net",
+      contact_address: "Jl. Lembursawah, Pabuaran, Sukabumi, Jawa Barat 43173",
+      
+      // Colors
+      background_color: "#0F172A",
+      surface_color: "#1E293B",
+      text_color: "#F1F5F9",
+      primary_action_color: "#38BDF8",
+      secondary_action_color: "#0EA5E9",
+      
+      // Typography
+      font_family: "Inter",
+      font_size: 16,
+      
+      // Theme
+      dark_mode: true
+    };
+
+    let currentSlide = 0;
+    const totalSlides = 3;
+
+    function createApp() {
+      const root = document.getElementById('app-root');
+      root.innerHTML = '';
+
+      const container = document.createElement('div');
+      container.className = 'h-full w-full overflow-y-auto theme-transition';
+      container.style.scrollBehavior = 'smooth';
+
+      // Navigation
+      const nav = document.createElement('nav');
+      nav.className = 'sticky top-0 z-50 glass-effect theme-transition';
+      nav.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+      nav.innerHTML = `
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center justify-between h-16">
+           <div class="flex items-center gap-3">
+              <img src="logo.png" alt="Company Logo" class="w-10 h-10 rounded-lg object-cover" onerror="this.style.display='none'; this.alt='Logo failed to load';" />
+              <div>
+                <h1 id="nav-company-name" class="font-bold text-lg"></h1>
+                <p id="nav-company-tagline" class="text-xs opacity-75"></p>
+              </div>
+            </div>
+            <div class="flex items-center gap-6">
+              <nav class="hidden md:flex items-center gap-6">
+                <a href="#home" class="text-sm font-medium hover:opacity-70 transition-opacity">Home</a>
+                <a href="#about" class="text-sm font-medium hover:opacity-70 transition-opacity">About</a>
+                <a href="#pricing" class="text-sm font-medium hover:opacity-70 transition-opacity">Pricing</a>
+                <a href="#coverage" class="text-sm font-medium hover:opacity-70 transition-opacity">Coverage</a>
+                <a href="#contact" class="text-sm font-medium hover:opacity-70 transition-opacity">Contact</a>
+              </nav>
+              <button id="mobile-menu-toggle" class="md:hidden p-2 rounded-lg theme-transition hover:opacity-80" aria-label="Toggle menu">
+                <svg id="menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+                <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+              <button id="theme-toggle" class="p-2 rounded-lg theme-transition hover:opacity-80" aria-label="Toggle theme">
+                <svg id="theme-icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                <svg id="theme-icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden theme-transition border-t" style="border-color: rgba(255,255,255,0.1);">
+          <div class="px-4 py-4 space-y-3">
+            <a href="#home" class="block py-2 text-sm font-medium hover:opacity-70 transition-opacity mobile-menu-link">Home</a>
+            <a href="#about" class="block py-2 text-sm font-medium hover:opacity-70 transition-opacity mobile-menu-link">About</a>
+            <a href="#pricing" class="block py-2 text-sm font-medium hover:opacity-70 transition-opacity mobile-menu-link">Pricing</a>
+            <a href="#coverage" class="block py-2 text-sm font-medium hover:opacity-70 transition-opacity mobile-menu-link">Coverage</a>
+            <a href="#contact" class="block py-2 text-sm font-medium hover:opacity-70 transition-opacity mobile-menu-link">Contact</a>
+          </div>
+        </div>
+      `;
+
+      // Hero Slider Section
+      const heroSection = document.createElement('section');
+      heroSection.id = 'home';
+      heroSection.className = 'relative';
+      heroSection.innerHTML = `
+        <div class="slider-container">
+          <div class="slider-track" id="slider-track">
+            <!-- Slide 1 -->
+            <div class="slider-slide relative fiber-glow" style="min-height: 500px;">
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div class="max-w-4xl mx-auto px-6 text-center z-10">
+                  <div class="inline-block px-4 py-1.5 rounded-full mb-4 text-sm font-medium" style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3);">
+                    🚀 FTTH Technology
+                  </div>
+                  <h2 id="hero-title" class="font-bold mb-4" style="font-size: 3rem; line-height: 1.1;"></h2>
+                  <p id="hero-subtitle" class="text-lg opacity-90 mb-8 max-w-2xl mx-auto"></p>
+                  <button id="hero-cta" class="px-8 py-3.5 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"></button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Slide 2 -->
+            <div class="slider-slide relative" style="min-height: 500px;">
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div class="max-w-4xl mx-auto px-6 text-center z-10">
+                  <svg class="w-24 h-24 mx-auto mb-6" viewBox="0 0 100 100" fill="none">
+                    <circle cx="50" cy="50" r="45" stroke="currentColor" stroke-width="2" opacity="0.2"/>
+                    <circle cx="50" cy="50" r="35" stroke="currentColor" stroke-width="2" opacity="0.3"/>
+                    <circle cx="50" cy="50" r="25" stroke="currentColor" stroke-width="2" opacity="0.4"/>
+                    <circle cx="50" cy="50" r="8" fill="currentColor"/>
+                    <path d="M50 50L80 30M50 50L80 70M50 50L20 30M50 50L20 70" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                  <h2 class="text-4xl font-bold mb-4">99.2% Network Uptime</h2>
+                  <p class="text-lg opacity-90 max-w-2xl mx-auto">Infrastruktur fiber yang andal dengan koneksi redundan memastikan Anda tetap online 24/7</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Slide 3 -->
+            <div class="slider-slide relative" style="min-height: 500px;">
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div class="max-w-4xl mx-auto px-6 text-center z-10">
+                  <div class="text-6xl mb-6">⚡</div>
+                  <h2 class="text-4xl font-bold mb-4">Symmetric Upload & Download</h2>
+                  <p class="text-lg opacity-90 max-w-2xl mx-auto">Kecepatan fiber dengan kecepatan unggah dan unduh yang sama - sempurna untuk pembuat konten dan sosial media.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Slider Controls -->
+          <div class="absolute bottom-8 left-0 right-0 flex justify-center gap-2 z-20">
+            <div class="slider-dot" data-slide="0"></div>
+            <div class="slider-dot" data-slide="1"></div>
+            <div class="slider-dot" data-slide="2"></div>
+          </div>
+          
+          <button id="slider-prev" class="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full glass-effect hover:opacity-80 transition-opacity z-20" aria-label="Previous slide">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          
+          <button id="slider-next" class="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full glass-effect hover:opacity-80 transition-opacity z-20" aria-label="Next slide">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      `;
+
+      // Profile Section
+      const profileSection = document.createElement('section');
+      profileSection.id = 'about';
+      profileSection.className = 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16';
+      profileSection.innerHTML = `
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 id="profile-title" class="text-3xl font-bold mb-6"></h2>
+            <p id="profile-description" class="text-lg opacity-90 leading-relaxed mb-8"></p>
+            <div class="grid grid-cols-3 gap-6">
+              <div class="text-center">
+                <div class="text-3xl font-bold mb-1">5+</div>
+                <div class="text-sm opacity-75">Years Experience</div>
+              </div>
+              <div class="text-center">
+                <div class="text-3xl font-bold mb-1">500+</div>
+                <div class="text-sm opacity-75">Customers</div>
+              </div>
+              <div class="text-center">
+                <div class="text-3xl font-bold mb-1">9+</div>
+                <div class="text-sm opacity-75">Village</div>
+              </div>
+            </div>
+          </div>
+          <div class="relative">
+            <svg class="w-full h-auto" viewBox="0 0 400 400" fill="none">
+              <defs>
+                <linearGradient id="fiber-line" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#38BDF8"/>
+                  <stop offset="100%" stop-color="#0EA5E9"/>
+                </linearGradient>
+              </defs>
+              <circle cx="200" cy="200" r="150" stroke="url(#fiber-line)" stroke-width="3" fill="none" opacity="0.2"/>
+              <circle cx="200" cy="200" r="120" stroke="url(#fiber-line)" stroke-width="3" fill="none" opacity="0.3"/>
+              <circle cx="200" cy="200" r="90" stroke="url(#fiber-line)" stroke-width="3" fill="none" opacity="0.4"/>
+              <circle cx="200" cy="200" r="60" fill="url(#fiber-line)" opacity="0.2"/>
+              <circle cx="200" cy="200" r="20" fill="url(#fiber-line)"/>
+              
+              <circle cx="200" cy="50" r="8" fill="#38BDF8"/>
+              <circle cx="350" cy="200" r="8" fill="#38BDF8"/>
+              <circle cx="200" cy="350" r="8" fill="#38BDF8"/>
+              <circle cx="50" cy="200" r="8" fill="#38BDF8"/>
+              
+              <line x1="200" y1="200" x2="200" y2="50" stroke="url(#fiber-line)" stroke-width="2"/>
+              <line x1="200" y1="200" x2="350" y2="200" stroke="url(#fiber-line)" stroke-width="2"/>
+              <line x1="200" y1="200" x2="200" y2="350" stroke="url(#fiber-line)" stroke-width="2"/>
+              <line x1="200" y1="200" x2="50" y2="200" stroke="url(#fiber-line)" stroke-width="2"/>
+            </svg>
+          </div>
+        </div>
+      `;
+
+      // Pricing Section
+      const pricingSection = document.createElement('section');
+      pricingSection.id = 'pricing';
+      pricingSection.className = 'py-16 theme-transition';
+      pricingSection.innerHTML = `
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold mb-4">Pilihan Paket</h2>
+            <p class="text-lg opacity-75">Pilih paket yang tepat untuk kebutuhan Anda</p>
+          </div>
+          
+          <div class="grid md:grid-cols-3 gap-8">
+            <!-- Plan 1 -->
+            <article class="rounded-2xl p-8 theme-transition border-2 hover:scale-105 transition-transform">
+              <div class="text-sm font-semibold mb-2 opacity-75">PAKET</div>
+              <h3 id="plan1-name" class="text-2xl font-bold mb-2"></h3>
+              <div class="flex items-baseline gap-2 mb-4">
+                <span id="plan1-price" class="text-4xl font-bold"></span>
+                <span class="opacity-75">/bln</span>
+              </div>
+              <div id="plan1-speed" class="text-lg font-semibold mb-6 px-4 py-2 rounded-full inline-block"></div>
+              <ul class="space-y-3 mb-8">
+                <li class="flex items-center gap-2">
+                  <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Unlimited Data</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Free Installation</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>24/7 Support</span>
+                </li>
+              </ul>
+              <button class="w-full py-3 rounded-full font-semibold theme-transition border-2 hover:opacity-80">Choose Plan</button>
+            </article>
+
+            <!-- Plan 2 (Popular) -->
+            <article class="rounded-2xl p-8 theme-transition border-2 hover:scale-105 transition-transform relative">
+              <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-sm font-bold" style="background: linear-gradient(135deg, #38BDF8, #0EA5E9);">
+                MOST POPULAR
+              </div>
+              <div class="text-sm font-semibold mb-2 opacity-75">PAKET</div>
+              <h3 id="plan2-name" class="text-2xl font-bold mb-2"></h3>
+              <div class="flex items-baseline gap-2 mb-4">
+                <span id="plan2-price" class="text-4xl font-bold"></span>
+                <span class="opacity-75">/bln</span>
+              </div>
+              <div id="plan2-speed" class="text-lg font-semibold mb-6 px-4 py-2 rounded-full inline-block"></div>
+              <ul class="space-y-3 mb-8">
+                <li class="flex items-center gap-2">
+                  <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Unlimited Data</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Free Installation</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Priority Support</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Free Wi-Fi 6 Router</span>
+                </li>
+              </ul>
+              <button class="w-full py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all">Choose Plan</button>
+            </article>
+
+            <!-- Plan 3 -->
+            <article class="rounded-2xl p-8 theme-transition border-2 hover:scale-105 transition-transform">
+              <div class="text-sm font-semibold mb-2 opacity-75">PAKET</div>
+              <h3 id="plan3-name" class="text-2xl font-bold mb-2"></h3>
+              <div class="flex items-baseline gap-2 mb-4">
+                <span id="plan3-price" class="text-4xl font-bold"></span>
+                <span class="opacity-75">/bln</span>
+              </div>
+              <div id="plan3-speed" class="text-lg font-semibold mb-6 px-4 py-2 rounded-full inline-block"></div>
+              <ul class="space-y-3 mb-8">
+                <li class="flex items-center gap-2">
+                  <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Unlimited Data</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Free Installation</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>VIP Support</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Premium Wi-Fi 6E Router</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Static IP Address</span>
+                </li>
+              </ul>
+              <button class="w-full py-3 rounded-full font-semibold theme-transition border-2 hover:opacity-80">Choose Plan</button>
+            </article>
+          </div>
+        </div>
+      `;
+
+      // Coverage Section
+      const coverageSection = document.createElement('section');
+      coverageSection.id = 'coverage';
+      coverageSection.className = 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16';
+      coverageSection.innerHTML = `
+        <div class="text-center mb-12">
+          <h2 id="coverage-title" class="text-3xl font-bold mb-4"></h2>
+          <p class="text-lg opacity-75">Kami berekspansi ke seluruh Kecamatan di Kabupaten Sukabumi</p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+          <div class="rounded-2xl p-8 theme-transition">
+            <div class="coverage-map relative rounded-xl overflow-hidden" style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(14, 165, 233, 0.1));">
+              <svg class="w-full h-full" viewBox="0 0 400 300" fill="none">
+                <path d="M50 150 Q100 100 150 120 T250 140 T350 130" stroke="currentColor" stroke-width="2" opacity="0.3" stroke-dasharray="5,5"/>
+                <circle class="map-marker" cx="80" cy="130" r="6" fill="#38BDF8"/>
+                <circle class="map-marker" cx="150" cy="120" r="6" fill="#38BDF8"/>
+                <circle class="map-marker" cx="220" cy="140" r="6" fill="#38BDF8"/>
+                <circle class="map-marker" cx="290" cy="135" r="6" fill="#38BDF8"/>
+                <circle class="map-marker" cx="120" cy="180" r="6" fill="#0EA5E9"/>
+                <circle class="map-marker" cx="200" cy="190" r="6" fill="#0EA5E9"/>
+                <circle class="map-marker" cx="270" cy="180" r="6" fill="#0EA5E9"/>
+              </svg>
+            </div>
+          </div>
+          
+          <div>
+            <h3 class="text-2xl font-bold mb-6">Desa yang Tersedia</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full" style="background: #38BDF8;"></div>
+                <span>Pabuaran</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full" style="background: #38BDF8;"></div>
+                <span>Lembursawah</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full" style="background: #38BDF8;"></div>
+                <span>Ciwalat</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full" style="background: #38BDF8;"></div>
+                <span>Sukajaya</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full" style="background: #0EA5E9;"></div>
+                <span>Bantarsari</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full" style="background: #0EA5E9;"></div>
+                <span>Sirnasari</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full" style="background: #0EA5E9;"></div>
+                <span>Cibadak</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full" style="background: #0EA5E9;"></div>
+                <span>Citamiang</span>
+              </div>
+            </div>
+            <p class="mt-6 text-sm opacity-75">+ 1 desa di kecamatan Purabaya</p>
+          </div>
+        </div>
+      `;
+
+      // Contact Section
+      const contactSection = document.createElement('section');
+      contactSection.id = 'contact';
+      contactSection.className = 'py-16 theme-transition';
+      contactSection.innerHTML = `
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-12">
+            <h2 id="contact-title" class="text-3xl font-bold mb-4"></h2>
+            <p class="text-lg opacity-75">Kami di sini untuk membantu Anda terhubung</p>
+          </div>
+          
+          <div class="grid md:grid-cols-2 gap-12">
+            <div class="space-y-6">
+              <div class="flex items-start gap-4">
+                <div class="p-3 rounded-lg" style="background: rgba(56, 189, 248, 0.1);">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold mb-1">WhatsApp</h3>
+                  <p id="contact-phone" class="opacity-75"></p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-4">
+                <div class="p-3 rounded-lg" style="background: rgba(56, 189, 248, 0.1);">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold mb-1">Email</h3>
+                  <p id="contact-email" class="opacity-75"></p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-4">
+                <div class="p-3 rounded-lg" style="background: rgba(56, 189, 248, 0.1);">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold mb-1">Office</h3>
+                  <p id="contact-address" class="opacity-75"></p>
+                </div>
+              </div>
+            </div>
+            
+            <form id="contact-form" class="rounded-2xl p-8 theme-transition space-y-4">
+              <div>
+                <label for="contact-name" class="block text-sm font-medium mb-2">Nama Lengkap</label>
+                <input type="text" id="contact-name" name="contact-name" required class="w-full px-4 py-3 rounded-lg theme-transition border focus:outline-none focus:ring-2 focus:ring-offset-2" placeholder="Muhammad Idris">
+              </div>
+              
+              <div>
+                <label for="contact-email-input" class="block text-sm font-medium mb-2">Alamat Email</label>
+                <input type="email" id="contact-email-input" name="contact-email-input" required class="w-full px-4 py-3 rounded-lg theme-transition border focus:outline-none focus:ring-2 focus:ring-offset-2" placeholder="idris@contoh.com">
+              </div>
+              
+              <div>
+                <label for="contact-message" class="block text-sm font-medium mb-2">Pesan</label>
+                <textarea id="contact-message" name="contact-message" required rows="4" class="w-full px-4 py-3 rounded-lg theme-transition border focus:outline-none focus:ring-2 focus:ring-offset-2" placeholder="Pesan anda"></textarea>
+              </div>
+              
+              <button type="submit" class="w-full py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all">Kirim Pesan</button>
+              
+              <p id="contact-form-message" class="text-sm text-center min-h-[1.5rem]"></p>
+            </form>
+          </div>
+        </div>
+      `;
+
+      // Footer
+      const footer = document.createElement('footer');
+      footer.className = 'py-8 mt-16 border-t theme-transition';
+      footer.style.borderColor = 'rgba(255,255,255,0.1)';
+      footer.innerHTML = `
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p class="opacity-75 text-sm">© 2025 <span id="footer-company-name"></span>. All rights reserved. | PT Solusi Teknologi Santara.</p>
+        </div>
+      `;
+
+      container.appendChild(nav);
+      container.appendChild(heroSection);
+      container.appendChild(profileSection);
+      container.appendChild(pricingSection);
+      container.appendChild(coverageSection);
+      container.appendChild(contactSection);
+      container.appendChild(footer);
+      root.appendChild(container);
+
+      // Setup slider
+      setupSlider();
+      
+      // Setup theme toggle
+      setupThemeToggle();
+      
+      // Setup contact form
+      setupContactForm();
+      
+      // Setup mobile menu
+      setupMobileMenu();
+    }
+
+    function setupSlider() {
+      const track = document.getElementById('slider-track');
+      const dots = document.querySelectorAll('.slider-dot');
+      const prevBtn = document.getElementById('slider-prev');
+      const nextBtn = document.getElementById('slider-next');
+
+      function updateSlider() {
+        track.style.transform = `translateX(-${currentSlide * 100}%)`;
+        dots.forEach((dot, index) => {
+          if (index === currentSlide) {
+            dot.classList.add('active');
+          } else {
+            dot.classList.remove('active');
+          }
+        });
+      }
+
+      prevBtn.addEventListener('click', () => {
+        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+        updateSlider();
+      });
+
+      nextBtn.addEventListener('click', () => {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        updateSlider();
+      });
+
+      dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          currentSlide = index;
+          updateSlider();
+        });
+      });
+
+      // Auto-advance slider
+      setInterval(() => {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        updateSlider();
+      }, 5000);
+
+      updateSlider();
+    }
+
+    function setupThemeToggle() {
+      const toggleBtn = document.getElementById('theme-toggle');
+      const sunIcon = document.getElementById('theme-icon-sun');
+      const moonIcon = document.getElementById('theme-icon-moon');
+
+      toggleBtn.addEventListener('click', () => {
+        const currentDarkMode = window.elementSdk?.config?.dark_mode ?? defaultConfig.dark_mode;
+        const newDarkMode = !currentDarkMode;
+        
+        if (window.elementSdk) {
+          window.elementSdk.setConfig({ dark_mode: newDarkMode });
+        } else {
+          defaultConfig.dark_mode = newDarkMode;
+          onConfigChange(defaultConfig);
+        }
+      });
+    }
+
+    function setupContactForm() {
+      const form = document.getElementById('contact-form');
+      const message = document.getElementById('contact-form-message');
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        message.textContent = '✓ Message sent! We\'ll get back to you within 24 hours.';
+        message.style.color = '#38BDF8';
+        setTimeout(() => {
+          message.textContent = '';
+          form.reset();
+        }, 3000);
+      });
+    }
+
+    function setupMobileMenu() {
+      const menuToggle = document.getElementById('mobile-menu-toggle');
+      const mobileMenu = document.getElementById('mobile-menu');
+      const menuIcon = document.getElementById('menu-icon');
+      const closeIcon = document.getElementById('close-icon');
+      const menuLinks = document.querySelectorAll('.mobile-menu-link');
+
+      let isMenuOpen = false;
+
+      menuToggle.addEventListener('click', () => {
+        isMenuOpen = !isMenuOpen;
+        if (isMenuOpen) {
+          mobileMenu.classList.remove('hidden');
+          menuIcon.classList.add('hidden');
+          closeIcon.classList.remove('hidden');
+        } else {
+          mobileMenu.classList.add('hidden');
+          menuIcon.classList.remove('hidden');
+          closeIcon.classList.add('hidden');
+        }
+      });
+
+      // Close menu when clicking a link
+      menuLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          isMenuOpen = false;
+          mobileMenu.classList.add('hidden');
+          menuIcon.classList.remove('hidden');
+          closeIcon.classList.add('hidden');
+        });
+      });
+    }
+
+    async function onConfigChange(config) {
+      const cfg = { ...defaultConfig, ...config };
+      
+      const baseFont = cfg.font_family;
+      const baseSize = cfg.font_size;
+      const fullStack = `${baseFont}, system-ui, -apple-system, sans-serif`;
+
+      // Theme colors
+      let bgColor, surfaceColor, textColor, primaryColor, secondaryColor;
+      
+      if (cfg.dark_mode) {
+        bgColor = cfg.background_color;
+        surfaceColor = cfg.surface_color;
+        textColor = cfg.text_color;
+        primaryColor = cfg.primary_action_color;
+        secondaryColor = cfg.secondary_action_color;
+      } else {
+        // Light mode colors
+        bgColor = "#F8FAFC";
+        surfaceColor = "#FFFFFF";
+        textColor = "#0F172A";
+        primaryColor = "#0EA5E9";
+        secondaryColor = "#38BDF8";
+      }
+
+      // Apply global styles
+      const body = document.body;
+      const root = document.getElementById('app-root');
+      
+      body.style.backgroundColor = bgColor;
+      body.style.color = textColor;
+      body.style.fontFamily = fullStack;
+      body.style.fontSize = baseSize + 'px';
+      
+      if (root) {
+        root.style.backgroundColor = bgColor;
+        root.style.color = textColor;
+      }
+
+      // Update theme icons
+      const sunIcon = document.getElementById('theme-icon-sun');
+      const moonIcon = document.getElementById('theme-icon-moon');
+      if (sunIcon && moonIcon) {
+        if (cfg.dark_mode) {
+          sunIcon.classList.add('hidden');
+          moonIcon.classList.remove('hidden');
+        } else {
+          sunIcon.classList.remove('hidden');
+          moonIcon.classList.add('hidden');
+        }
+      }
+
+      // Update all theme-transition elements
+      const themeElements = document.querySelectorAll('.theme-transition');
+      themeElements.forEach(el => {
+        if (el.tagName === 'NAV') {
+          el.style.backgroundColor = cfg.dark_mode ? 'rgba(15, 23, 42, 0.8)' : 'rgba(248, 250, 252, 0.8)';
+        } else if (el.tagName === 'SECTION') {
+          el.style.backgroundColor = surfaceColor;
+        }
+        el.style.color = textColor;
+      });
+
+      // Update mobile menu
+      const mobileMenu = document.getElementById('mobile-menu');
+      if (mobileMenu) {
+        mobileMenu.style.backgroundColor = cfg.dark_mode ? 'rgba(15, 23, 42, 0.95)' : 'rgba(248, 250, 252, 0.95)';
+        mobileMenu.style.borderColor = cfg.dark_mode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+      }
+
+      // Update text content
+      const updates = {
+        'nav-company-name': cfg.company_name,
+        'nav-company-tagline': cfg.company_tagline,
+        'hero-title': cfg.hero_title,
+        'hero-subtitle': cfg.hero_subtitle,
+        'hero-cta': cfg.hero_cta,
+        'profile-title': cfg.profile_title,
+        'profile-description': cfg.profile_description,
+        'plan1-name': cfg.plan1_name,
+        'plan1-speed': cfg.plan1_speed,
+        'plan1-price': cfg.plan1_price,
+        'plan2-name': cfg.plan2_name,
+        'plan2-speed': cfg.plan2_speed,
+        'plan2-price': cfg.plan2_price,
+        'plan3-name': cfg.plan3_name,
+        'plan3-speed': cfg.plan3_speed,
+        'plan3-price': cfg.plan3_price,
+        'coverage-title': cfg.coverage_title,
+        'contact-title': cfg.contact_title,
+        'contact-phone': cfg.contact_phone,
+        'contact-email': cfg.contact_email,
+        'contact-address': cfg.contact_address,
+        'footer-company-name': cfg.company_name
+      };
+
+      Object.entries(updates).forEach(([id, value]) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+      });
+
+      // Update buttons and interactive elements
+      const heroCta = document.getElementById('hero-cta');
+      if (heroCta) {
+        heroCta.style.backgroundColor = primaryColor;
+        heroCta.style.color = cfg.dark_mode ? '#020617' : '#FFFFFF';
+      }
+
+      const contactSubmit = document.querySelector('#contact-form button[type="submit"]');
+      if (contactSubmit) {
+        contactSubmit.style.backgroundColor = primaryColor;
+        contactSubmit.style.color = cfg.dark_mode ? '#020617' : '#FFFFFF';
+      }
+
+      // Update plan cards
+      const planCards = document.querySelectorAll('article');
+      planCards.forEach((card, index) => {
+        card.style.backgroundColor = surfaceColor;
+        card.style.borderColor = index === 1 ? primaryColor : (cfg.dark_mode ? '#334155' : '#E2E8F0');
+        
+        const speedBadge = card.querySelector('[id*="speed"]');
+        if (speedBadge) {
+          speedBadge.style.backgroundColor = cfg.dark_mode ? 'rgba(56, 189, 248, 0.1)' : 'rgba(14, 165, 233, 0.1)';
+          speedBadge.style.color = primaryColor;
+        }
+
+        const button = card.querySelector('button');
+        if (button && index === 1) {
+          button.style.backgroundColor = primaryColor;
+          button.style.color = cfg.dark_mode ? '#020617' : '#FFFFFF';
+        } else if (button) {
+          button.style.backgroundColor = 'transparent';
+          button.style.borderColor = primaryColor;
+          button.style.color = textColor;
+        }
+      });
+
+      // Update slider dots
+      const dots = document.querySelectorAll('.slider-dot');
+      dots.forEach(dot => {
+        dot.style.backgroundColor = cfg.dark_mode ? '#475569' : '#CBD5E1';
+        if (dot.classList.contains('active')) {
+          dot.style.backgroundColor = primaryColor;
+        }
+      });
+
+      // Update form inputs
+      const inputs = document.querySelectorAll('input, textarea');
+      inputs.forEach(input => {
+        input.style.backgroundColor = bgColor;
+        input.style.color = textColor;
+        input.style.borderColor = cfg.dark_mode ? '#475569' : '#CBD5E1';
+      });
+
+      // Update glass effect buttons
+      const glassButtons = document.querySelectorAll('.glass-effect');
+      glassButtons.forEach(btn => {
+        btn.style.backgroundColor = cfg.dark_mode ? 'rgba(30, 41, 59, 0.8)' : 'rgba(255, 255, 255, 0.8)';
+        btn.style.color = textColor;
+      });
+    }
+
+    function mapToCapabilities(config) {
+      const cfg = { ...defaultConfig, ...config };
+      return {
+        recolorables: [
+          {
+            get: () => cfg.background_color,
+            set: (value) => window.elementSdk.setConfig({ background_color: value })
+          },
+          {
+            get: () => cfg.surface_color,
+            set: (value) => window.elementSdk.setConfig({ surface_color: value })
+          },
+          {
+            get: () => cfg.text_color,
+            set: (value) => window.elementSdk.setConfig({ text_color: value })
+          },
+          {
+            get: () => cfg.primary_action_color,
+            set: (value) => window.elementSdk.setConfig({ primary_action_color: value })
+          },
+          {
+            get: () => cfg.secondary_action_color,
+            set: (value) => window.elementSdk.setConfig({ secondary_action_color: value })
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => cfg.font_family,
+          set: (value) => window.elementSdk.setConfig({ font_family: value })
+        },
+        fontSizeable: {
+          get: () => cfg.font_size,
+          set: (value) => window.elementSdk.setConfig({ font_size: value })
+        }
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      const cfg = { ...defaultConfig, ...config };
+      return new Map([
+        ['company_name', cfg.company_name],
+        ['company_tagline', cfg.company_tagline],
+        ['hero_title', cfg.hero_title],
+        ['hero_subtitle', cfg.hero_subtitle],
+        ['hero_cta', cfg.hero_cta],
+        ['profile_title', cfg.profile_title],
+        ['profile_description', cfg.profile_description],
+        ['plan1_name', cfg.plan1_name],
+        ['plan1_speed', cfg.plan1_speed],
+        ['plan1_price', cfg.plan1_price],
+        ['plan2_name', cfg.plan2_name],
+        ['plan2_speed', cfg.plan2_speed],
+        ['plan2_price', cfg.plan2_price],
+        ['plan3_name', cfg.plan3_name],
+        ['plan3_speed', cfg.plan3_speed],
+        ['plan3_price', cfg.plan3_price],
+        ['coverage_title', cfg.coverage_title],
+        ['contact_title', cfg.contact_title],
+        ['contact_phone', cfg.contact_phone],
+        ['contact_email', cfg.contact_email],
+        ['contact_address', cfg.contact_address]
+      ]);
+    }
+
+    // Initialize
+    createApp();
+    onConfigChange(defaultConfig);
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a2ec2d560c699c5',t:'MTc2Mzg4MDkyNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
