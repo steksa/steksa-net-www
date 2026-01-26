@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Speed Test - Steksa.NET</title>
+  <title>SpeedTest - STEKSA.NET</title>
 
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -15,47 +15,11 @@
     * { font-family: 'Plus Jakarta Sans', sans-serif; }
     body { box-sizing: border-box; }
 
-    /* Floating particles */
-    .floating-particles {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .particle {
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      background: rgba(255, 204, 0, 0.25);
-      border-radius: 50%;
-      animation: float 8s infinite ease-in-out;
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
-    }
-
-    /* Iframe container */
-    .iframe-container {
-      position: relative;
-      width: 100%;
-      padding-top: 65%;
-      border-radius: 16px;
-      overflow: hidden;
-    }
-    .iframe-container iframe {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: 0;
-    }
-    @media (min-width: 1024px) {
-      .iframe-container { padding-top: 55%; }
+    /* Glass card */
+    .glass {
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(0,0,0,0.08);
     }
 
     /* Shimmer loading overlay */
@@ -68,115 +32,114 @@
       0% { background-position: -200% 0; }
       100% { background-position: 200% 0; }
     }
+
+    /* iframe container */
+    .iframe-container {
+      position: relative;
+      width: 100%;
+      padding-top: 65%;
+      border-radius: 18px;
+      overflow: hidden;
+    }
+    .iframe-container iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    @media (min-width: 992px) {
+      .iframe-container { padding-top: 55%; }
+    }
+
+    .btn-yellow {
+      background: #ffcc00;
+      border: 1px solid rgba(255, 204, 0, 0.5);
+      color: #000;
+      font-weight: 700;
+    }
+    .btn-yellow:hover {
+      background: #ffdb33;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+    }
+
+    .rounded-2xl { border-radius: 18px; }
   </style>
 </head>
 
-<body class="min-h-screen w-full bg-white text-gray-900 relative">
-  <!-- Floating Particles Background -->
-  <div class="floating-particles" id="particles"></div>
+<body class="min-vh-100 position-relative bg-white text-dark">
 
-  <!-- Header -->
-  <header class="relative z-10 border-b border-gray-200 py-6 lg:py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div class="space-y-3">
-          <div class="inline-flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-yellow-500/10 border border-yellow-500/30">
-            <span class="text-2xl">🚀</span>
-            <span id="brandName" class="font-bold text-yellow-600 text-lg">Speed Test Steksa.NET</span>
-          </div>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg border-bottom position-relative z-1 glass">
+    <div class="container py-2">
 
-          <h1 id="pageTitle" class="text-3xl lg:text-4xl font-extrabold">
-            Uji Kecepatan Internet Anda
-          </h1>
-
-          <p id="hintText" class="text-gray-500 text-sm lg:text-base max-w-xl">
-            Pastikan WiFi stabil. Jika bisa, lakukan tes dekat router agar hasil lebih maksimal.
-          </p>
+      <!-- Brand -->
+      <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="#">
+        <span class="d-inline-flex align-items-center justify-content-center rounded-circle"
+              style="width:38px;height:38px;background:#ffcc00;color:#000;font-weight:900;">
+          ST
+        </span>
+        <div class="d-flex flex-column lh-sm">
+          <span class="fw-extrabold" style="font-size:15px;">STEKSA.NET</span>
+          <span class="text-muted" style="font-size:12px;">SpeedTest</span>
         </div>
+      </a>
 
-        <div class="flex flex-col sm:flex-row gap-3">
-          <a href="https://openspeedtest.com" target="_blank" rel="noopener noreferrer"
-            class="px-6 py-3 rounded-xl text-center inline-flex items-center justify-center gap-2 font-semibold
-                   bg-yellow-400 text-black hover:shadow-lg hover:-translate-y-0.5 transition">
-            <span>⚡</span>
-            <span>Powered by OpenSpeedTest</span>
-          </a>
+      <!-- Toggle -->
+      <button class="navbar-toggler border-0 shadow-none" type="button"
+        data-bs-toggle="collapse" data-bs-target="#navbarSpeedtest"
+        aria-controls="navbarSpeedtest" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-          <!-- Toggle Dark Mode -->
-          <button id="toggleTheme"
-            class="px-5 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition
-                   inline-flex items-center justify-center gap-2 font-semibold">
-            <span id="themeIcon">🌙</span>
-            <span id="themeText">Dark Mode</span>
-          </button>
-        </div>
+      <!-- Menu -->
+      <div class="collapse navbar-collapse" id="navbarSpeedtest">
+        <ul class="navbar-nav ms-auto gap-lg-2 mt-3 mt-lg-0">
+          <li class="nav-item">
+            <a class="nav-link fw-semibold" href="https://steksa.net" target="_blank">Beranda</a>
+          </li>            
+          <li class="nav-item">
+            <a class="nav-link fw-semibold" href="#speedtest">Mulai Test</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link fw-semibold" href="#tips">Tips</a>
+          </li>
+        </ul>
       </div>
+
     </div>
-  </header>
+  </nav>
 
-  <!-- Stats Preview -->
-  <section class="relative z-10 py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-        <div class="rounded-xl p-4 text-center border border-gray-200 bg-white/70 backdrop-blur">
-          <div class="text-3xl mb-2">📥</div>
-          <div class="text-xs text-gray-500 uppercase tracking-wider">Download</div>
-          <div class="text-lg font-bold text-green-600 mt-1">-- Mbps</div>
-        </div>
-
-        <div class="rounded-xl p-4 text-center border border-gray-200 bg-white/70 backdrop-blur">
-          <div class="text-3xl mb-2">📤</div>
-          <div class="text-xs text-gray-500 uppercase tracking-wider">Upload</div>
-          <div class="text-lg font-bold text-blue-600 mt-1">-- Mbps</div>
-        </div>
-
-        <div class="rounded-xl p-4 text-center border border-gray-200 bg-white/70 backdrop-blur">
-          <div class="text-3xl mb-2">📶</div>
-          <div class="text-xs text-gray-500 uppercase tracking-wider">Ping</div>
-          <div class="text-lg font-bold text-yellow-600 mt-1">-- ms</div>
-        </div>
-
-        <div class="rounded-xl p-4 text-center border border-gray-200 bg-white/70 backdrop-blur">
-          <div class="text-3xl mb-2">📊</div>
-          <div class="text-xs text-gray-500 uppercase tracking-wider">Jitter</div>
-          <div class="text-lg font-bold text-purple-600 mt-1">-- ms</div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <br>
 
   <!-- Main Speed Test -->
-  <main class="relative z-10 pb-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="rounded-2xl border border-gray-200 bg-white/70 backdrop-blur overflow-hidden">
+  <main class="position-relative z-1 pb-5">
+    <div class="container">
+      <div class="glass rounded-2xl overflow-hidden">
+
         <!-- Panel Header -->
-        <div class="p-4 lg:p-5 border-b border-gray-200 bg-white/60">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="p-3 p-lg-4 border-bottom">
+          <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-3">
             <div>
-              <h2 class="font-bold text-lg flex items-center gap-2">
-                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                Speed Test Panel
-              </h2>
-              <p class="text-gray-500 text-sm mt-1">Download • Upload • Ping • Jitter</p>
-            </div>
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="d-inline-block rounded-circle" style="width:10px;height:10px;background:#22c55e;"></span>
+                <h2 class="h5 fw-bold mb-0">SpeedTest Panel</h2>
 
-            <div class="flex gap-2">
-              <button onclick="refreshTest()"
-                class="px-4 py-2 rounded-lg bg-gray-100 border border-gray-200 text-sm font-medium hover:bg-gray-200 transition-all flex items-center gap-2">
-                <span>🔄</span><span>Refresh</span>
-              </button>
+                <button onclick="refreshTest()"
+                  class="btn btn-light border px-3 py-2 rounded-2xl d-inline-flex align-items-center gap-2">
+                  <span class="fw-semibold small">Refresh</span>
+                </button>
+              </div>
 
-              <button onclick="scrollToTest()"
-                class="px-4 py-2 rounded-lg bg-yellow-400 border border-yellow-500/40 text-black text-sm font-semibold hover:bg-yellow-300 transition-all flex items-center gap-2">
-                <span>⚡</span><span>Mulai Test</span>
-              </button>
+              <p class="text-muted small mb-0 mt-1">Download • Upload • Ping • Jitter</p>
             </div>
           </div>
         </div>
 
         <!-- iFrame -->
-        <div class="iframe-container bg-gray-100" id="speedtest">
-          <div class="shimmer absolute inset-0 z-10 pointer-events-none" id="loadingOverlay"></div>
+        <div class="iframe-container bg-light position-relative" id="speedtest">
+          <div class="shimmer position-absolute top-0 start-0 w-100 h-100 z-1" id="loadingOverlay"></div>
 
           <iframe
             src="https://openspeedtest.com/speedtest"
@@ -188,93 +151,73 @@
       </div>
 
       <!-- Tips -->
-      <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="rounded-xl p-4 border border-gray-200 bg-white/70 backdrop-blur">
-          <div class="flex items-start gap-3">
-            <span class="text-2xl">💡</span>
-            <div>
-              <h3 class="font-semibold text-sm">Tips Akurat</h3>
-              <p class="text-xs text-gray-500 mt-1">Tutup aplikasi lain yang menggunakan internet saat testing.</p>
+      <div class="row g-3 mt-4" id="tips">
+        <div class="col-md-4">
+          <div class="glass rounded-2xl p-3">
+            <div class="d-flex gap-3">
+              <div class="fs-3">💡</div>
+              <div>
+                <div class="fw-semibold">Tips Akurat</div>
+                <div class="text-muted small mt-1">Tutup aplikasi lain yang menggunakan internet saat testing, dan pastikan tidak ada perangkat lain yang terhubung bersamaan.</div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="rounded-xl p-4 border border-gray-200 bg-white/70 backdrop-blur">
-          <div class="flex items-start gap-3">
-            <span class="text-2xl">📍</span>
-            <div>
-              <h3 class="font-semibold text-sm">Posisi Ideal</h3>
-              <p class="text-xs text-gray-500 mt-1">Dekatkan perangkat ke router untuk hasil maksimal.</p>
+        <div class="col-md-4">
+          <div class="glass rounded-2xl p-3">
+            <div class="d-flex gap-3">
+              <div class="fs-3">📍</div>
+              <div>
+                <div class="fw-semibold">Posisi Ideal</div>
+                <div class="text-muted small mt-1">Dekatkan perangkat ke router untuk hasil maksimal.</div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="rounded-xl p-4 border border-gray-200 bg-white/70 backdrop-blur">
-          <div class="flex items-start gap-3">
-            <span class="text-2xl">🔌</span>
-            <div>
-              <h3 class="font-semibold text-sm">Koneksi Kabel</h3>
-              <p class="text-xs text-gray-500 mt-1">Gunakan kabel LAN jika memungkinkan untuk hasil stabil.</p>
+        <div class="col-md-4">
+          <div class="glass rounded-2xl p-3">
+            <div class="d-flex gap-3">
+              <div class="fs-3">🔌</div>
+              <div>
+                <div class="fw-semibold">Koneksi Kabel</div>
+                <div class="text-muted small mt-1">Gunakan kabel LAN jika memungkinkan untuk hasil stabil.</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
     </div>
   </main>
 
   <!-- Footer -->
-  <footer class="relative z-10 py-6 border-t border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-        <p class="text-gray-500 text-sm">
-          © <span id="year"></span> <span id="footerBrand">Steksa.NET</span> • Internet Service • Network Monitoring
+  <footer class="position-relative z-1 py-4 border-top">
+    <div class="container">
+      <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2 text-center text-sm-start">
+        <p class="text-muted small mb-0">
+          &copy; <span id="year"></span> <span id="footerBrand">STEKSA.NET</span> #SolusiInternetKeluarga
         </p>
-        <div class="flex items-center gap-4 text-xs text-gray-500">
-          <span class="flex items-center gap-1">
-            <span class="w-2 h-2 bg-green-500 rounded-full"></span> Server Online
-          </span>
+        <div class="d-flex align-items-center gap-2 text-muted small">
+          <span>⚡ Powered by OpenSpeedTest</span>
         </div>
       </div>
     </div>
   </footer>
 
-  <script>
-    // ======= BASIC CONFIG =======
-    const defaultConfig = {
-      brand_name: "Speed Test Steksa.NET",
-      page_title: "Uji Kecepatan Internet Anda",
-      hint_text: "Pastikan WiFi stabil. Jika bisa, lakukan tes dekat router agar hasil lebih maksimal."
-    };
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+  <script>
     document.getElementById("year").textContent = new Date().getFullYear();
 
-    // ======= PARTICLES =======
-    function createParticles() {
-      const container = document.getElementById("particles");
-      for (let i = 0; i < 15; i++) {
-        const particle = document.createElement("div");
-        particle.className = "particle";
-        particle.style.left = Math.random() * 100 + "%";
-        particle.style.top = Math.random() * 100 + "%";
-        particle.style.animationDelay = Math.random() * 8 + "s";
-        particle.style.animationDuration = (6 + Math.random() * 4) + "s";
-        container.appendChild(particle);
-      }
-    }
-    createParticles();
-
-    // ======= SPEEDTEST HELPERS =======
     function hideLoading() {
       const overlay = document.getElementById("loadingOverlay");
       if (overlay) {
         overlay.style.opacity = "0";
         setTimeout(() => (overlay.style.display = "none"), 300);
       }
-    }
-
-    function scrollToTest() {
-      const element = document.getElementById("speedtest");
-      if (element) element.scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
     function refreshTest() {
@@ -288,48 +231,6 @@
         iframe.src = iframe.src;
       }
     }
-
-    // ======= UPDATE TEXT =======
-    function updateUI(config) {
-      document.getElementById("brandName").textContent = config.brand_name || defaultConfig.brand_name;
-      document.getElementById("pageTitle").textContent = config.page_title || defaultConfig.page_title;
-      document.getElementById("hintText").textContent = config.hint_text || defaultConfig.hint_text;
-
-      const footerBrand = (config.brand_name || defaultConfig.brand_name).replace(/^Speed Test\s*/i, "");
-      document.getElementById("footerBrand").textContent = footerBrand || "Steksa.NET";
-    }
-    updateUI(defaultConfig);
-
-    // ======= THEME TOGGLE (LIGHT DEFAULT) =======
-    const toggleBtn = document.getElementById("toggleTheme");
-    const themeIcon = document.getElementById("themeIcon");
-    const themeText = document.getElementById("themeText");
-
-    function applyTheme(theme) {
-      const isDark = theme === "dark";
-      document.documentElement.classList.toggle("dark", isDark);
-
-      // Body colors
-      document.body.className = isDark
-        ? "min-h-screen w-full bg-[#0a0a0b] text-white relative"
-        : "min-h-screen w-full bg-white text-gray-900 relative";
-
-      // Update toggle text
-      themeIcon.textContent = isDark ? "☀️" : "🌙";
-      themeText.textContent = isDark ? "Light Mode" : "Dark Mode";
-
-      // Store preference
-      localStorage.setItem("theme", theme);
-    }
-
-    // Load preference (default light)
-    const savedTheme = localStorage.getItem("theme") || "light";
-    applyTheme(savedTheme);
-
-    toggleBtn.addEventListener("click", () => {
-      const current = localStorage.getItem("theme") || "light";
-      applyTheme(current === "dark" ? "light" : "dark");
-    });
   </script>
 </body>
 </html>
